@@ -1,4 +1,4 @@
-package com.sandiprai.weatheria;
+package com.sandiprai.weatheria.weather;
 
 /**
  * Created by Sandip on 5/11/2018.

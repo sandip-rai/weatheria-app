@@ -5,4 +5,5 @@
     <string name="error_ok_button">OK</string>
     <string name="network_unavailable_msg">Network Unavailable!</string>
     <string name="dark_sky_msg"><a href="https://darksky.net/poweredby">Powered by Dark Sky</a></string>
+    <string name="no_data">No data available!!</string>
 </resources>

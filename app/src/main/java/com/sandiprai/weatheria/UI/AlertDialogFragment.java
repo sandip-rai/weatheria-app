@@ -1,10 +1,12 @@
-package com.sandiprai.weatheria;
+package com.sandiprai.weatheria.UI;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+
+import com.sandiprai.weatheria.R;
 
 /**
  * Created by Sandip on 5/7/2018.

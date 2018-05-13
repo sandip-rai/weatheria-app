@@ -1,6 +1,7 @@
-package com.sandiprai.weatheria;
+package com.sandiprai.weatheria.UI;
 
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -14,11 +15,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sandiprai.weatheria.R;
 import com.sandiprai.weatheria.databinding.ActivityMainBinding;
+import com.sandiprai.weatheria.weather.CurrentWeather;
+import com.sandiprai.weatheria.weather.Day;
+import com.sandiprai.weatheria.weather.Forecast;
+import com.sandiprai.weatheria.weather.Hour;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 
@@ -31,7 +37,7 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
-    private CurrentWeather currentWeather;
+    private Forecast forecast;
 
     private ImageView iconImageView;
 
@@ -85,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
                         //Response response = call.execute();
                         String jsonData = response.body().string();
                         if (response.isSuccessful()) {
-                            currentWeather = getCurrentDetails(jsonData);
+                            forecast = parseForecastDetails(jsonData);
+                            CurrentWeather currentWeather = forecast.getCurrentWeather();
 
                             final CurrentWeather displayWeather = new CurrentWeather(
                                     currentWeather.getLocationLabel(),
@@ -124,6 +131,73 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private Forecast parseForecastDetails(String jsonData) throws JSONException {
+        //Create a Forecast object to hold currentweather and arrays of daily and hourly objects
+        Forecast forecast = new Forecast();
+        forecast.setCurrentWeather(getCurrentDetails(jsonData));
+        forecast.setHourlyForecast(getHourlyForecast(jsonData));
+        forecast.setDailyForecast(getDailyForecast(jsonData));
+
+        return  forecast;
+    }
+
+    private Day[] getDailyForecast(String jsonData) throws JSONException {
+        JSONObject forecast = new JSONObject(jsonData);
+        String timezone = forecast.getString("timezone");
+
+        //Get the daily object from the jsonData
+        JSONObject daily = forecast.getJSONObject("daily");
+
+        //get the array from the daily object
+        JSONArray data = daily.getJSONArray("data");
+
+        Day[] days = new Day[data.length()];
+        for(int i = 0; i < days.length; i++){
+            JSONObject jsonDay = data.getJSONObject(i);
+
+            //Create the day object and set its properties
+            Day day = new Day();
+            day.setSummary(jsonDay.getString("summary"));
+            day.setIcon(jsonDay.getString("icon"));
+            day.setTempMax(jsonDay.getDouble("temperatureMax"));
+            day.setTime(jsonDay.getLong("time"));
+            day.setTimeZone(timezone);
+
+            days[i] = day; //Add the day object to the days array
+        }
+
+        return days; //return the days array
+
+    }
+
+    private Hour[] getHourlyForecast(String jsonData) throws JSONException {
+        JSONObject forecast = new JSONObject(jsonData);
+        String timezone = forecast.getString("timezone");
+
+        //Get the hourly object from the jsonData
+        JSONObject hourly = forecast.getJSONObject("hourly");
+        JSONArray data = hourly.getJSONArray("data"); //get the array from the hourly object
+
+        //Initialize the hours array with the same size as data array above
+        Hour[] hours = new Hour[data.length()];
+        for(int i = 0; i < hours.length; i++){
+            //get the JSONObject from data array using the index
+            JSONObject jsonHour = data.getJSONObject(i);
+
+            //Create the hour object and set its properties
+            Hour hour = new Hour();
+            hour.setSummary(jsonHour.getString("summary"));
+            hour.setTemp(jsonHour.getDouble("temperature"));
+            hour.setIcon(jsonHour.getString("icon"));
+            hour.setTime(jsonHour.getLong("time"));
+            hour.setTimeZone(timezone);
+
+            hours[i] = hour; //Add the hour object to the hours array
+        }
+
+        return hours; //return the hours array
     }
 
     private CurrentWeather getCurrentDetails(String jsonData) throws JSONException{
@@ -174,5 +248,10 @@ public class MainActivity extends AppCompatActivity {
     private void alertUserAboutError() {
         AlertDialogFragment dialogFragment = new AlertDialogFragment();
         dialogFragment.show(getFragmentManager(),"error_dialog");
+    }
+
+    public void onClickHourlyButton(View view){
+        Intent intent = new Intent(this, DailyForecastActivity.class);
+        startActivity(intent);
     }
 }

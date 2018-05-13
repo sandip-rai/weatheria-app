@@ -1,4 +1,8 @@
-package com.sandiprai.weatheria;
+package com.sandiprai.weatheria.weather;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Created by Sandip on 5/11/2018.
@@ -27,8 +31,8 @@ public class Day {
         this.summary = summary;
     }
 
-    public double getTempMax() {
-        return tempMax;
+    public int getTempMax() {
+        return (int)Math.round(tempMax);
     }
 
     public void setTempMax(double tempMax) {
@@ -49,5 +53,17 @@ public class Day {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public int getIconId(){
+        return Forecast.getIconId(icon);
+    }
+
+    public String getDayOfTheWeek(){
+        SimpleDateFormat format = new SimpleDateFormat("EEEE");
+        format.setTimeZone(TimeZone.getTimeZone(timeZone));
+        Date date = new Date(time * 1000);
+
+        return format.format(date);
     }
 }
